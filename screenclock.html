@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<!-- Previous head content remains the same -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Display</title>
+    <style>
+        /* Previous general styles remain the same */
+        :root[data-theme="light"] {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --secondary-text: #333333;
+            --toggle-bg: #ddd;
+            --toggle-circle: #fff;
+        }
+        
+        :root[data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --secondary-text: #cccccc;
+            --toggle-bg: #555;
+            --toggle-circle: #1a1a1a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: var(--bg-color);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .clock-container {
+            text-align: center;
+            padding: 3rem;
+            position: relative;
+            width: 100%;
+            max-width: 95vw;
+        }
+
+        .time {
+            font-size: min(11.7rem, 15.6vw); /* Increased by 30% from 9rem/12vw */
+            font-weight: bold;
+            margin: 1rem 0;
+            line-height: 1.1;
+            white-space: nowrap;
+        }
+
+        .date {
+            font-size: 187.5%;
+            margin: 1rem 0;
+            color: var(--secondary-text);
+            line-height: 1.2;
+        }
+
+        .theme-switch-wrapper {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .theme-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--toggle-bg);
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: var(--toggle-circle);
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #666666;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .fullscreen-mode .fullscreen-text, 
+        .fullscreen-mode .support-text,
+        .fullscreen-mode .support-link {
+            display: none;
+        }
+
+        .fullscreen-mode .clock-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .fullscreen-text, .support-text, .support-link {
+            font-size: 80%;
+            margin-top: 0.5rem;
+            color: gray;
+            display: block;
+        }
+
+        .support-link {
+            text-decoration: none;
+        }
+
+        .support-link:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="clock-container" id="container">
+        <div class="theme-switch-wrapper">
+            <label class="theme-switch">
+                <input type="checkbox" id="theme-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="date" id="date"></div>
+        <div class="time" id="clock"></div>
+        <div class="fullscreen-text" id="fullscreen-text">Press F11 for a clean and full screen display</div>
+        <div class="support-text" id="support-text">Free Forever, Powered by You ❤️ This tool is always free to use, but if you love it, we welcome your support. <a href="https://buymeacoffee.com/techfillet" target="_blank">Click here to support us</a>.</div>
+        <div><a href="https://docs.google.com/forms/d/1wCa2smqjn3nD5E52npjXZSi_VeDi6Tdg_NzBDW8QDnU" target="_blank" class="support-link">For Enquiries and Support</a></div>
+    </div>
+
+    <!-- Previous script remains exactly the same -->
+    <script>
+        // All previous JavaScript code remains exactly the same
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const container = document.getElementById('container');
+        const fullscreenText = document.getElementById('fullscreen-text');
+        const supportText = document.getElementById('support-text');
+        let isFullscreen = false;
+
+        function setTheme(theme) {
+            html.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            themeToggle.checked = theme === 'dark';
+        }
+
+        themeToggle.addEventListener('change', function() {
+            setTheme(this.checked ? 'dark' : 'light');
+        });
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        setTheme(savedTheme);
+
+        function updateTime() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            
+            const formattedHours = hours % 12 || 12;
+            const formattedMinutes = String(minutes).padStart(2, '0');
+            const formattedSeconds = String(seconds).padStart(2, '0');
+            
+            document.getElementById('clock').textContent = `${formattedHours}:${formattedMinutes}:${formattedSeconds} ${ampm}`;
+            
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('date').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+        document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+        function handleFullscreenChange() {
+            if (!document.fullscreenElement && 
+                !document.webkitFullscreenElement && 
+                !document.mozFullScreenElement && 
+                !document.msFullscreenElement) {
+                
+                isFullscreen = false;
+                container.classList.remove('fullscreen-mode');
+            }
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'F11') {
+                event.preventDefault();
+                isFullscreen = !isFullscreen;
+                container.classList.toggle('fullscreen-mode');
+                
+                if (isFullscreen) {
+                    if (document.documentElement.requestFullscreen) {
+                        document.documentElement.requestFullscreen();
+                    } else if (document.documentElement.webkitRequestFullscreen) {
+                        document.documentElement.webkitRequestFullscreen();
+                    } else if (document.documentElement.mozRequestFullScreen) {
+                        document.documentElement.mozRequestFullScreen();
+                    } else if (document.documentElement.msRequestFullscreen) {
+                        document.documentElement.msRequestFullscreen();
+                    }
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.mozCancelFullScreen) {
+                        document.mozCancelFullScreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
